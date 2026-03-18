@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSO STUDIO — App Prototipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brown-dark: #4A3428;
+    --brown-mid: #7B5C4A;
+    --brown-light: #A68270;
+    --brown-pale: #C4A898;
+    --cream: #F5EDE6;
+    --cream-dark: #EDE0D6;
+    --skin: #D4B8A8;
+    --white: #FFFFFF;
+    --text-muted: #A08878;
+    --border: #DDD0C8;
+    --red: #C0392B;
+    --sage: #8A9E84;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(145deg, #E8DDD6 0%, #D4C4B8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 28px;
+    padding: 24px 16px 48px;
+  }
+
+  /* DEMO HEADER */
+  .demo-header { text-align: center; }
+  .demo-eyebrow {
+    font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--brown-mid); font-weight: 600; margin-bottom: 6px;
+  }
+  .demo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem; font-weight: 600;
+    color: var(--brown-dark); line-height: 1.2;
+  }
+  .demo-title em { font-style: italic; color: var(--brown-mid); }
+  .demo-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; font-weight: 300; }
+
+  /* TOGGLE */
+  .view-toggle {
+    display: flex; background: var(--brown-dark);
+    border-radius: 50px; padding: 5px; gap: 4px;
+  }
+  .toggle-btn {
+    padding: 9px 22px; border: none; border-radius: 50px;
+    font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 500;
+    cursor: pointer; transition: all 0.3s; letter-spacing: 0.04em;
+  }
+  .toggle-btn.active { background: var(--brown-mid); color: #fff; }
+  .toggle-btn:not(.active) { background: transparent; color: #888; }
+
+  /* PHONE */
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--brown-mid); font-weight: 500; }
+  .phone {
+    width: 330px; height: 665px;
+    background: #1a100a;
+    border-radius: 46px; padding: 12px;
+    box-shadow: 0 50px 100px rgba(74,52,40,0.4), 0 0 0 1px rgba(255,255,255,0.07);
+  }
+  .phone-inner {
+    width: 100%; height: 100%;
+    background: var(--cream);
+    border-radius: 36px; overflow: hidden; position: relative;
+  }
+  .phone-notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 94px; height: 26px; background: #1a100a;
+    border-radius: 0 0 16px 16px; z-index: 20;
+  }
+
+  /* SCREENS */
+  .screen {
+    display: none; width: 100%; height: 100%;
+    flex-direction: column; position: absolute; top: 0; left: 0;
+    animation: fadeUp 0.3s ease;
+  }
+  .screen.active { display: flex; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .scroll-area { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    display: flex; background: var(--white);
+    border-top: 1px solid var(--border); padding: 8px 0 14px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; cursor: pointer; padding: 5px 0;
+  }
+  .nav-icon svg { width: 19px; height: 19px; }
+  .nav-label { font-size: 0.56rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .nav-item.active .nav-label { color: var(--brown-mid); }
+  .nav-item.active svg { stroke: var(--brown-mid); }
+  .nav-item:not(.active) .nav-label { color: #C4B4AC; }
+  .nav-item:not(.active) svg { stroke: #C4B4AC; }
+
+  /* ══════════════════════════════
+     CLIENT — HOME
+  ══════════════════════════════ */
+  .hero-block {
+    background: var(--brown-dark);
+    padding: 40px 20px 24px;
+    position: relative; overflow: hidden;
+  }
+  .hero-block::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .pulso-logo {
+    text-align: center; margin-bottom: 18px; position: relative;
+  }
+  .logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem; font-weight: 700;
+    color: var(--white); letter-spacing: 0.14em;
+    line-height: 1;
+  }
+  .logo-text .o-special {
+    display: inline-block;
+    width: 28px; height: 28px;
+    border: 3px solid var(--white);
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-left: -4px; margin-right: -1px;
+    position: relative; top: -1px;
+  }
+  .logo-sub {
+    font-size: 0.58rem; letter-spacing: 0.32em;
+    color: rgba(255,255,255,0.5); text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .hero-greeting { color: rgba(255,255,255,0.55); font-size: 0.75rem; font-weight: 300; }
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; color: var(--white); font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .next-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 14px 16px; margin-top: 14px;
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+  }
+  .next-dot {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--brown-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .next-info { flex: 1; }
+  .next-label-sm { font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown-pale); }
+  .next-class-name { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.05rem; margin-top: 2px; }
+  .next-time { font-size: 0.68rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .next-arrow { color: rgba(255,255,255,0.3); font-size: 1.2rem; }
+
+  .content-area { padding: 18px 18px 0; }
+  .section-title {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--text-muted); margin-bottom: 12px; font-weight: 600;
+  }
+  .class-list { display: flex; flex-direction: column; gap: 8px; }
+  .class-card {
+    background: var(--white); border-radius: 14px;
+    padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; border: 1px solid var(--border);
+    transition: transform 0.15s;
+  }
+  .class-card:active { transform: scale(0.98); }
+  .class-emoji {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .class-info { flex: 1; }
+  .class-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem; color: var(--brown-dark);
+  }
+  .class-meta { font-size: 0.66rem; color: var(--text-muted); margin-top: 2px; }
+  .spots-badge {
+    font-size: 0.6rem; font-weight: 600; padding: 3px 8px;
+    border-radius: 20px; letter-spacing: 0.04em;
+  }
+  .spots-few { background: #FDECEA; color: var(--red); }
+  .spots-ok { background: #EDF3EC; color: var(--sage); }
+  .sold-out { background: #F0EDE8; color: #999; }
+
+  /* ══════════════════════════════
+     CLIENT — PACKAGES
+  ══════════════════════════════ */
+  .pkg-hero {
+    background: var(--brown-dark); padding: 40px 20px 20px;
+    position: relative; overflow: hidden;
+  }
+  .pkg-hero::after {
+    content: '';
+    position: absolute; bottom: -40px; right: -40px;
+    width: 150px; height: 150px;
+    background: var(--brown-mid); opacity: 0.2; border-radius: 50%;
+  }
+  .back-btn {
+    background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
+    width: 34px; height: 34px; cursor: pointer; color: #fff;
+    font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .pkg-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; color: var(--white); font-weight: 400;
+  }
+  .pkg-hero-sub { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+  .pkg-list { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .pkg-card {
+    border-radius: 18px; padding: 18px; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .pkg-card.highlight { background: var(--brown-dark); }
+  .pkg-card.light { background: var(--white); border: 1px solid var(--border); }
+  .popular-tag {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--brown-mid); color: #fff;
+    font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em;
+    padding: 3px 9px; border-radius: 50px; text-transform: uppercase;
+  }
+  .pkg-name {
+    font-family: 'Playfair Display', serif; font-size: 1.1rem;
+  }
+  .pkg-card.highlight .pkg-name { color: var(--white); }
+  .pkg-card.light .pkg-name { color: var(--brown-dark); }
+  .pkg-desc { font-size: 0.68rem; margin: 4px 0 12px; }
+  .pkg-card.highlight .pkg-desc { color: rgba(255,255,255,0.45); }
+  .pkg-card.light .pkg-desc { color: var(--text-muted); }
+  .pkg-price {
+    font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 400; line-height: 1;
+  }
+  .pkg-card.highlight .pkg-price { color: var(--brown-pale); }
+  .pkg-card.light .pkg-price { color: var(--brown-dark); }
+  .pkg-price span { font-size: 0.7rem; opacity: 0.5; margin-left: 3px; font-family: 'Outfit'; }
+  .pkg-btn {
+    display: block; width: 100%; padding: 10px; border-radius: 10px; border: none;
+    font-family: 'Outfit', sans-serif; font-size: 0.74rem; font-weight: 600;
+    letter-spacing: 0.06em; cursor: pointer; margin-top: 14px;
+  }
+  .pkg-card.highlight .pkg-btn { background: var(--brown-mid); color: #fff; }
+  .pkg-card.light .pkg-btn { background: var(--brown-dark); color: #fff; }
+
+  /* ══════════════════════════════
+     ADMIN — DASHBOARD
+  ══════════════════════════════ */
+  .admin-hero {
+    background: var(--brown-dark);
+    padding: 40px 20px 20px;
+  }
+  .admin-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .admin-logo-sm { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--white); letter-spacing: 0.14em; }
+  .owner-badge {
+    background: var(--brown-mid); color: #fff;
+    font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+    padding: 4px 10px; border-radius: 50px; text-transform: uppercase;
+  }
+  .admin-greeting { color: rgba(255,255,255,0.45); font-size: 0.72rem; }
+  .admin-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #fff; font-weight: 400; margin-top: 2px; }
+  .today-tag {
+    display: inline-block; margin-top: 8px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6); font-size: 0.62rem; letter-spacing: 0.1em;
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    padding: 14px 16px;
+  }
+  .stat-card {
+    background: var(--white); border-radius: 14px;
+    padding: 14px; border: 1px solid var(--border);
+  }
+  .stat-card.accent { background: var(--brown-mid); border-color: var(--brown-mid); }
+  .stat-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-card.accent .stat-lbl { color: rgba(255,255,255,0.55); }
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 400; color: var(--brown-dark); line-height: 1;
+  }
+  .stat-card.accent .stat-val { color: #fff; }
+  .stat-trend { font-size: 0.62rem; color: var(--sage); margin-top: 5px; font-weight: 500; }
+  .stat-card.accent .stat-trend { color: rgba(255,255,255,0.6); }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--white); border-radius: 14px;
+    padding: 14px 16px; margin: 0 16px 14px; border: 1px solid var(--border);
+  }
+  .chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .chart-ttl { font-size: 0.68rem; font-weight: 600; color: var(--brown-dark); text-transform: uppercase; letter-spacing: 0.08em; }
+  .chart-tag { font-size: 0.6rem; color: var(--text-muted); background: var(--cream); padding: 3px 8px; border-radius: 20px; }
+  .bar-row { display: flex; align-items: flex-end; gap: 5px; height: 68px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--skin); }
+  .bar.hi { background: var(--brown-mid); }
+  .bar-lbl { font-size: 0.54rem; color: var(--text-muted); }
+
+  /* Reservations */
+  .section-head { padding: 4px 18px 10px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); font-weight: 600; }
+  .reserv-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .reserv-row {
+    background: var(--white); border-radius: 13px;
+    padding: 11px 13px; display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--border);
+  }
+  .av {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .ri { flex: 1; }
+  .rn { font-size: 0.78rem; font-weight: 500; color: var(--brown-dark); }
+  .rc { font-size: 0.63rem; color: var(--text-muted); margin-top: 1px; }
+  .rprice { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--brown-mid); }
+  .paid-pill {
+    font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em;
+    background: #EDF3EC; color: var(--sage); padding: 2px 7px; border-radius: 20px; text-transform: uppercase;
+  }
+
+  /* ══════════════════════════════
+     ADMIN — REPORT
+  ══════════════════════════════ */
+  .report-banner {
+    background: var(--brown-dark); padding: 40px 20px 22px;
+    position: relative; overflow: hidden;
+  }
+  .report-banner::before {
+    content: '';
+    position: absolute; bottom: -50px; right: -50px;
+    width: 180px; height: 180px;
+    background: var(--brown-mid); opacity: 0.15; border-radius: 50%;
+  }
+  .report-month { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+  .report-amount { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 400; color: var(--white); line-height: 1; }
+  .report-desc { font-size: 0.68rem; color: rgba(255,255,255,0.35); margin-top: 6px; }
+  .report-chips { display: flex; gap: 8px; margin-top: 12px; }
+  .rchip {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6); font-size: 0.62rem; padding: 4px 10px; border-radius: 20px;
+  }
+
+  .breakdown-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .bk-item {
+    background: var(--white); border-radius: 13px;
+    padding: 13px 14px; display: flex; align-items: center; gap: 11px;
+    border: 1px solid var(--border);
+  }
+  .bk-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .bk-info { flex: 1; }
+  .bk-name { font-size: 0.78rem; font-weight: 500; color: var(--brown-dark); }
+  .bk-count { font-size: 0.63rem; color: var(--text-muted); margin-top: 1px; }
+  .bk-total { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--brown-mid); }
+
+  .progress-bar-wrap { margin-top: 6px; }
+  .pbar-bg { height: 3px; background: var(--cream-dark); border-radius: 10px; overflow: hidden; }
+  .pbar-fill { height: 100%; background: var(--brown-mid); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <div class="demo-eyebrow">Prototipo interactivo</div>
+  <div class="demo-title">PULSO STUDIO <em>App</em></div>
+  <div class="demo-sub">Explora la vista de cliente y la vista de dueño · Tulancingo, Hidalgo</div>
+</div>
+
+<div class="view-toggle">
+  <button class="toggle-btn active" onclick="switchView('client')">🩰 Cliente</button>
+  <button class="toggle-btn" onclick="switchView('admin')">📊 Dueño</button>
+</div>
+
+<!-- ══════ CLIENT PHONE ══════ -->
+<div class="phone-wrap" id="phone-client">
+  <span class="phone-label">Vista del Cliente</span>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="phone-notch"></div>
+
+      <!-- CLIENT HOME -->
+      <div class="screen active" id="c-home" style="flex-direction:column;">
+        <div class="scroll-area">
+          <div class="hero-block">
+            <div class="pulso-logo">
+              <div class="logo-text">PULS<span class="o-special"></span></div>
+              <div class="logo-sub">S T U D I O</div>
+            </div>
+            <div class="hero-greeting">Hola de nuevo,</div>
+            <div class="hero-name">Sofía ✨</div>
+            <div class="next-card" onclick="showC('c-packages')">
+              <div class="next-dot">🩰</div>
+              <div class="next-info">
+                <div class="next-label-sm">Tu próxima clase</div>
+                <div class="next-class-name">Barre · Vane</div>
+                <div class="next-time">Hoy 8:30 AM · Sala principal</div>
+              </div>
+              <div class="next-arrow">›</div>
+            </div>
+          </div>
+          <div class="content-area">
+            <div class="section-title">Clases de hoy — 16 Mar</div>
+            <div class="class-list">
+              <div class="class-card">
+                <div class="class-emoji" style="background:#F5EDE6;">🩰</div>
+                <div class="class-info">
+                  <div class="class-name">Barre</div>
+                  <div class="class-meta">8:30 AM · Vane</div>
+                </div>
+                <span class="spots-badge sold-out">Sold out</span>
+              </div>
+              <div class="class-card">
+                <div class="class-emoji" style="background:#F0EDE8;">🧘</div>
+                <div class="class-info">
+                  <div class="class-name">Pilates</div>
+                  <div class="class-meta">8:30 AM · Patty</div>
+                </div>
+                <span class="spots-badge spots-few">3 lugares</span>
+              </div>
+              <div class="class-card">
+                <div class="class-emoji" style="background:#F5EDE6;">🩰</div>
+                <div class="class-info">
+                  <div class="class-name">Barre Prenatal</div>
+                  <div class="class-meta">9:30 AM · Vane</div>
+                </div>
+                <span class="spots-badge spots-ok">6 lugares</span>
+              </div>
+              <div class="class-card">
+                <div class="class-emoji" style="background:#EFF2EC;">🔥</div>
+                <div class="class-info">
+                  <div class="class-name">Sculpt</div>
+                  <div class="class-meta">6:00 PM · Miros</div>
+                </div>
+                <span class="spots-badge spots-ok">8 lugares</span>
+              </div>
+              <div class="class-card">
+                <div class="class-emoji" style="background:#FDF0EE;">🔆</div>
+                <div class="class-info">
+                  <div class="class-name">Hot Sculpt</div>
+                  <div class="class-meta">7:00 PM · Gaby</div>
+                </div>
+                <span class="spots-badge spots-few">2 lugares</span>
+              </div>
+              <div class="class-card">
+                <div class="class-emoji" style="background:#EEF0F5;">💃</div>
+                <div class="class-info">
+                  <div class="class-name">Baile</div>
+                  <div class="class-meta">8:00 PM · Israel</div>
+                </div>
+                <span class="spots-badge spots-ok">10 lugares</span>
+              </div>
+            </div>
+            <div style="height:20px;"></div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Inicio</span>
+          </div>
+          <div class="nav-item" onclick="showC('c-packages')">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Paquetes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Horario</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Perfil</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENT PACKAGES -->
+      <div class="screen" id="c-packages" style="flex-direction:column;">
+        <div class="scroll-area">
+          <div class="pkg-hero">
+            <button class="back-btn" onclick="showC('c-home')">←</button>
+            <div class="pkg-hero-title">Paquetes &amp; Membresías</div>
+            <div class="pkg-hero-sub">Elige el plan que mejor va contigo</div>
+          </div>
+          <div class="pkg-list">
+            <div class="pkg-card light">
+              <div class="pkg-name">Clase Suelta</div>
+              <div class="pkg-desc">Sin compromiso · Reserva cuando quieras</div>
+              <div class="pkg-price">$180<span>/ clase</span></div>
+              <button class="pkg-btn">Reservar ahora</button>
+            </div>
+            <div class="pkg-card highlight">
+              <div class="popular-tag">POPULAR</div>
+              <div class="pkg-name">Paquete 10 clases</div>
+              <div class="pkg-desc">Válido 3 meses · Ahorra $200</div>
+              <div class="pkg-price">$1,600<span>/ paquete</span></div>
+              <button class="pkg-btn">Comprar paquete</button>
+            </div>
+            <div class="pkg-card light">
+              <div class="pkg-name">Membresía Mensual</div>
+              <div class="pkg-desc">Clases ilimitadas · Cancela cuando quieras</div>
+              <div class="pkg-price">$2,200<span>/ mes</span></div>
+              <button class="pkg-btn">Suscribirme</button>
+            </div>
+          </div>
+          <div style="height:16px;"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item" onclick="showC('c-home')">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Inicio</span>
+          </div>
+          <div class="nav-item active">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Paquetes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Horario</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Perfil</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ADMIN PHONE ══════ -->
+<div class="phone-wrap" id="phone-admin" style="display:none;">
+  <span class="phone-label">Vista del Dueño</span>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="phone-notch"></div>
+
+      <!-- ADMIN DASHBOARD -->
+      <div class="screen active" id="a-dash" style="flex-direction:column;">
+        <div class="scroll-area">
+          <div class="admin-hero">
+            <div class="admin-top">
+              <div class="admin-logo-sm">PULSO</div>
+              <div class="owner-badge">Admin</div>
+            </div>
+            <div class="admin-greeting">Bienvenida,</div>
+            <div class="admin-name">Dueña del Studio 🤎</div>
+            <div class="today-tag">📅 Lunes 16 de Marzo · Hoy</div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card accent">
+              <div class="stat-lbl">Ingresos hoy</div>
+              <div class="stat-val">$3,240</div>
+              <div class="stat-trend">↑ +18% vs ayer</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Reservas hoy</div>
+              <div class="stat-val">23</div>
+              <div class="stat-trend">↑ 4 nuevas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Sold out</div>
+              <div class="stat-val">2</div>
+              <div class="stat-trend" style="color:var(--brown-pale);">Barre 8:30 AM</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Clientes activos</div>
+              <div class="stat-val">94</div>
+              <div class="stat-trend">↑ +11 este mes</div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-head">
+              <span class="chart-ttl">Ingresos semana</span>
+              <span class="chart-tag">Mar 2026</span>
+            </div>
+            <div class="bar-row">
+              <div class="bar-col"><div class="bar hi" style="height:68px;"></div><span class="bar-lbl">L</span></div>
+              <div class="bar-col"><div class="bar" style="height:45px;"></div><span class="bar-lbl">M</span></div>
+              <div class="bar-col"><div class="bar" style="height:52px;"></div><span class="bar-lbl">X</span></div>
+              <div class="bar-col"><div class="bar" style="height:38px;"></div><span class="bar-lbl">J</span></div>
+              <div class="bar-col"><div class="bar" style="height:60px;"></div><span class="bar-lbl">V</span></div>
+              <div class="bar-col"><div class="bar" style="height:55px;"></div><span class="bar-lbl">S</span></div>
+              <div class="bar-col"><div class="bar" style="height:18px;"></div><span class="bar-lbl">D</span></div>
+            </div>
+          </div>
+          <div class="section-head">Reservas de hoy</div>
+          <div class="reserv-list">
+            <div class="reserv-row">
+              <div class="av" style="background:#F5EDE6;color:var(--brown-mid);">S</div>
+              <div class="ri">
+                <div class="rn">Sofía Ramírez</div>
+                <div class="rc">Barre · 8:30 AM · Vane</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="rprice">$180</div>
+                <div class="paid-pill">Pagado</div>
+              </div>
+            </div>
+            <div class="reserv-row">
+              <div class="av" style="background:#EDF3EC;color:var(--sage);">M</div>
+              <div class="ri">
+                <div class="rn">Mariana Torres</div>
+                <div class="rc">Pilates · 8:30 AM · Patty</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="rprice">Paq 10</div>
+                <div class="paid-pill">Activo</div>
+              </div>
+            </div>
+            <div class="reserv-row">
+              <div class="av" style="background:#F0EAF5;color:#9B7AB5;">V</div>
+              <div class="ri">
+                <div class="rn">Valeria Soto</div>
+                <div class="rc">Barre Prenatal · 9:30 AM</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="rprice">Memb.</div>
+                <div class="paid-pill">Activo</div>
+              </div>
+            </div>
+          </div>
+          <div style="height:20px;"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Dashboard</span>
+          </div>
+          <div class="nav-item" onclick="showA('a-report')">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Reportes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Clientes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Config</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN REPORT -->
+      <div class="screen" id="a-report" style="flex-direction:column;">
+        <div class="scroll-area">
+          <div class="report-banner">
+            <button class="back-btn" onclick="showA('a-dash')">←</button>
+            <div class="report-month">Reporte mensual · Marzo 2026</div>
+            <div class="report-amount">$42,800</div>
+            <div class="report-desc">Ingresos totales del mes</div>
+            <div class="report-chips">
+              <span class="rchip">📋 178 reservas</span>
+              <span class="rchip">👥 94 clientes</span>
+              <span class="rchip">↑ +23%</span>
+            </div>
+          </div>
+          <div class="breakdown-list">
+            <div class="bk-item">
+              <div class="bk-icon" style="background:#F5EDE6;">🩰</div>
+              <div class="bk-info">
+                <div class="bk-name">Barre</div>
+                <div class="bk-count">72 clases reservadas</div>
+                <div class="progress-bar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:72%;"></div></div></div>
+              </div>
+              <div class="bk-total">$12,960</div>
+            </div>
+            <div class="bk-item">
+              <div class="bk-icon" style="background:#F0EDE8;">🧘</div>
+              <div class="bk-info">
+                <div class="bk-name">Pilates</div>
+                <div class="bk-count">44 clases reservadas</div>
+                <div class="progress-bar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:44%;"></div></div></div>
+              </div>
+              <div class="bk-total">$7,920</div>
+            </div>
+            <div class="bk-item">
+              <div class="bk-icon" style="background:#FDF0EE;">🔆</div>
+              <div class="bk-info">
+                <div class="bk-name">Hot Sculpt</div>
+                <div class="bk-count">36 clases reservadas</div>
+                <div class="progress-bar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:36%;"></div></div></div>
+              </div>
+              <div class="bk-total">$6,480</div>
+            </div>
+            <div class="bk-item">
+              <div class="bk-icon" style="background:#EEF0F5;">💃</div>
+              <div class="bk-info">
+                <div class="bk-name">Baile</div>
+                <div class="bk-count">26 clases reservadas</div>
+                <div class="progress-bar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:26%;"></div></div></div>
+              </div>
+              <div class="bk-total">$4,680</div>
+            </div>
+            <div class="bk-item">
+              <div class="bk-icon" style="background:#EDF3EC;">💳</div>
+              <div class="bk-info">
+                <div class="bk-name">Membresías</div>
+                <div class="bk-count">26 activas este mes</div>
+                <div class="progress-bar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:60%;"></div></div></div>
+              </div>
+              <div class="bk-total">$57,200</div>
+            </div>
+          </div>
+          <div style="height:20px;"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item" onclick="showA('a-dash')">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-linecap="round"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-linecap="round"/></svg></div>
+            <span class="nav-label">Dashboard</span>
+          </div>
+          <div class="nav-item active">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Reportes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Clientes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="nav-label">Config</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchView(v) {
+    const btns = document.querySelectorAll('.toggle-btn');
+    const cp = document.getElementById('phone-client');
+    const ap = document.getElementById('phone-admin');
+    if (v === 'client') {
+      btns[0].classList.add('active'); btns[1].classList.remove('active');
+      cp.style.display = 'flex'; ap.style.display = 'none';
+    } else {
+      btns[1].classList.add('active'); btns[0].classList.remove('active');
+      cp.style.display = 'none'; ap.style.display = 'flex';
+    }
+  }
+  function showC(id) {
+    document.querySelectorAll('#phone-client .screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function showA(id) {
+    document.querySelectorAll('#phone-admin .screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+</script>
+</body>
+</html>
